@@ -261,7 +261,11 @@ h2 span { color: var(--coral); }
 .part-label { display: block; margin-bottom: 7px; color: #82908d; font-size: 9px; font-weight: 800; letter-spacing: .15em; }
 .assessment-part p { margin: 0; white-space: pre-line; color: #5d6d73; font-size: 12px; line-height: 1.55; }
 .answer-part p { color: #71817b; }
-.delete-button { display: inline-flex; align-items: center; gap: 5px; margin-top: 20px; padding: 0; border: 0; background: transparent; color: #9baaa5; font-size: 11px; cursor: pointer; }
+.assessment-card-actions { display: flex; align-items: center; gap: 15px; margin-top: 20px; }
+.edit-button, .delete-button { display: inline-flex; align-items: center; gap: 5px; padding: 0; border: 0; background: transparent; font-size: 11px; cursor: pointer; }
+.edit-button { color: var(--teal-dark); font-weight: 800; }
+.edit-button:hover { color: var(--coral-dark); }
+.delete-button { color: #9baaa5; }
 .delete-button:hover { color: var(--coral-dark); }
 .assessment-empty { display: flex; align-items: center; gap: 15px; padding: 24px; border: 1px dashed #c8d2cc; border-radius: 9px; background: rgba(255,255,255,.45); }
 .empty-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 auto; border-radius: 9px; background: var(--teal-soft); color: var(--teal-dark); }
