@@ -822,7 +822,7 @@ export default function Home() {
                       <ul className="example-list">{selectedTerm.examples.map((example) => <li key={example}>{example}</li>)}</ul>
                     </div>
                     <div className="detail-block">
-                      <div className="block-heading"><span className="icon-disc"><Check size={15} /></span><strong>Teacher tops</strong></div>
+                      <div className="block-heading"><span className="icon-disc"><Check size={15} /></span><strong>Teacher tips</strong></div>
                       <ul className="tips-list">{selectedTerm.tips.map((tip) => <li key={tip}>{tip}</li>)}</ul>
                     </div>
                   </div>
