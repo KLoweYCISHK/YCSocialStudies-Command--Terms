@@ -458,6 +458,11 @@ const starterAssessments: Assessment[] = [
 ];
 
 const tierOrder: TierKey[] = ["foundation", "relational", "source"];
+const tierRank: Record<TierKey, number> = { foundation: 1, relational: 2, source: 3 };
+
+function highestTier(tiers: TierKey[]): TierKey {
+  return tiers.reduce((highest, tier) => tierRank[tier] > tierRank[highest] ? tier : highest, tiers[0] ?? "foundation");
+}
 
 function getStoredAssessments(): Assessment[] {
   if (typeof window === "undefined") return starterAssessments;
@@ -539,7 +544,7 @@ export default function Home() {
   }, [activeTier, searchQuery]);
 
   const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0] ?? terms.find((term) => term.tier === activeTier) ?? terms[0];
-  const visibleAssessments = assessments.filter((assessment) => assessment.tiers.includes(activeTier) && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
+  const visibleAssessments = assessments.filter((assessment) => highestTier(assessment.tiers) === activeTier && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
 
   function selectTier(tier: TierKey, shouldScroll = true) {
     setActiveTier(tier);
@@ -757,7 +762,7 @@ export default function Home() {
               <div>
                 <div className="section-label">Your team’s examples</div>
                 <h2>Keep the <span>practice bank</span> close.</h2>
-                <p>Add assessments your department has already used, so examples sit beside the command term guidance. Everything is saved in this browser for quick staff reference.</p>
+                <p>Add assessments your department has already used, so examples sit beside the command term guidance. Everything is saved in this browser for quick staff reference. When an assessment has more than one level tag, it is filed under its highest level.</p>
               </div>
               <button className="primary-button add-button" type="button" onClick={() => showAddForm ? closeAssessmentForm() : startNewAssessment()}>
                 {showAddForm ? <X size={17} /> : <Plus size={17} />} {showAddForm ? "Close form" : "Add an assessment"}
@@ -794,7 +799,7 @@ export default function Home() {
 
             <div className="assessment-toolbar">
               <div className="mini-tabs" role="tablist" aria-label="Assessment examples by level">
-                {tierOrder.map((tier) => <button key={tier} type="button" className={`mini-tab ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier, false)}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].shortLabel}<b>{assessments.filter((assessment) => assessment.tiers.includes(tier)).length}</b></button>)}
+                {tierOrder.map((tier) => <button key={tier} type="button" className={`mini-tab ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier, false)}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].shortLabel}<b>{assessments.filter((assessment) => highestTier(assessment.tiers) === tier).length}</b></button>)}
               </div>
               <div className="assessment-filters"><label htmlFor="year-filter">Show</label><select id="year-filter" value={activeYearGroup} onChange={(event) => setActiveYearGroup(event.target.value as YearGroup | "all")}><option value="all">All year groups</option>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select><span>{visibleAssessments.length} saved {visibleAssessments.length === 1 ? "example" : "examples"}</span></div>
             </div>
@@ -805,7 +810,7 @@ export default function Home() {
               <div className="assessment-grid">
                 {visibleAssessments.map((assessment) => (
                   <article className="assessment-card" key={assessment.id}>
-                    <div className="assessment-card-top"><div className="assessment-badges">{assessment.tiers.map((tier) => <TierBadge tier={tier} key={tier} />)}<span className="year-badge">{yearGroupLabels[assessment.yearGroup]}</span></div><span className="saved-date">Saved {assessment.createdAt}</span></div>
+                    <div className="assessment-card-top"><div className="assessment-badges">{assessment.tiers.map((tier) => <TierBadge tier={tier} key={tier} />)}<span className="year-badge">{yearGroupLabels[assessment.yearGroup]}</span></div><span className="saved-date">Filed under {tierMeta[highestTier(assessment.tiers)].shortLabel} · {assessment.createdAt}</span></div>
                     <h3>{assessment.name}</h3>
                     <div className="assessment-part"><span className="part-label">QUESTIONS</span><p>{assessment.questions}</p></div>
                     <div className="assessment-part answer-part"><span className="part-label">ANSWERS / NOTES</span><p>{assessment.answers || "No answer notes added yet."}</p></div>
