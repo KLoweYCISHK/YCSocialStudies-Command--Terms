@@ -223,6 +223,17 @@ h2 span { color: var(--coral); }
 .field-group textarea { resize: vertical; min-height: 94px; line-height: 1.5; }
 .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(47,122,121,.12); }
 .field-group input::placeholder, .field-group textarea::placeholder { color: #a4afab; }
+.question-label-row { display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.add-question-button { display: inline-flex; align-items: center; gap: 5px; padding: 3px 0; border: 0; background: transparent; color: var(--teal-dark); font-size: 11px; font-weight: 800; cursor: pointer; }
+.add-question-button:hover { color: var(--coral-dark); }
+.question-list { display: grid; gap: 9px; }
+.question-input-row { display: grid; grid-template-columns: 28px 1fr 30px; align-items: start; gap: 8px; }
+.question-number { display: grid; place-items: center; width: 25px; height: 25px; margin-top: 10px; border-radius: 50%; background: var(--teal-soft); color: var(--teal-dark); font-size: 11px; font-weight: 800; }
+.question-input-row textarea { min-height: 74px; }
+.remove-question-button { display: grid; place-items: center; width: 28px; height: 28px; margin-top: 9px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: #9aa9a3; cursor: pointer; }
+.remove-question-button:hover:not(:disabled) { background: var(--coral-soft); color: var(--coral-dark); }
+.remove-question-button:disabled { cursor: not-allowed; opacity: .38; }
+.field-help { color: #7c8985; font-size: 11px; font-weight: 500; }
 .form-actions { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 21px; color: #7c8985; font-size: 11px; }
 .assessment-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin: 57px 0 18px; padding-bottom: 13px; border-bottom: 1px solid var(--line); }
 .mini-tabs { display: flex; gap: 20px; flex-wrap: wrap; }

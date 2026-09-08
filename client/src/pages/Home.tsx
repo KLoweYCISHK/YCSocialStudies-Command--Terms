@@ -522,7 +522,7 @@ export default function Home() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [assessmentForm, setAssessmentForm] = useState({ name: "", tier: "foundation" as TierKey, yearGroup: "year7" as YearGroup, questions: "", answers: "" });
+  const [assessmentForm, setAssessmentForm] = useState({ name: "", tier: "foundation" as TierKey, yearGroup: "year7" as YearGroup, questions: [""], answers: "" });
 
   const filteredTerms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -550,20 +550,21 @@ export default function Home() {
 
   function saveAssessment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!assessmentForm.name.trim() || !assessmentForm.questions.trim()) return;
+    const cleanedQuestions = assessmentForm.questions.map((question) => question.trim()).filter(Boolean);
+    if (!assessmentForm.name.trim() || cleanedQuestions.length === 0) return;
     const newAssessment: Assessment = {
       id: `${Date.now()}`,
       name: assessmentForm.name.trim(),
       tier: assessmentForm.tier,
       yearGroup: assessmentForm.yearGroup,
-      questions: assessmentForm.questions.trim(),
+      questions: cleanedQuestions.join("\n\n"),
       answers: assessmentForm.answers.trim(),
       createdAt: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
     };
     const next = [newAssessment, ...assessments];
     setAssessments(next);
     window.localStorage.setItem("command-terms-assessments", JSON.stringify(next));
-    setAssessmentForm({ name: "", tier: activeTier, yearGroup: assessmentForm.yearGroup, questions: "", answers: "" });
+    setAssessmentForm({ name: "", tier: activeTier, yearGroup: assessmentForm.yearGroup, questions: [""], answers: "" });
     setShowAddForm(false);
     setSaveMessage("Assessment saved to this browser.");
     window.setTimeout(() => setSaveMessage(""), 3200);
@@ -742,7 +743,19 @@ export default function Home() {
                   <div className="field-group"><label htmlFor="assessment-name">Assessment name <span>*</span></label><input id="assessment-name" required value={assessmentForm.name} onChange={(event) => setAssessmentForm({ ...assessmentForm, name: event.target.value })} placeholder="e.g. Rise of the Mongol Empire" /></div>
                   <div className="field-group"><label htmlFor="assessment-tier">Thinking level</label><select id="assessment-tier" value={assessmentForm.tier} onChange={(event) => setAssessmentForm({ ...assessmentForm, tier: event.target.value as TierKey })}>{tierOrder.map((tier) => <option key={tier} value={tier}>{tierMeta[tier].label}</option>)}</select></div>
                   <div className="field-group"><label htmlFor="assessment-year">Year group</label><select id="assessment-year" value={assessmentForm.yearGroup} onChange={(event) => setAssessmentForm({ ...assessmentForm, yearGroup: event.target.value as YearGroup })}>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select></div>
-                  <div className="field-group field-wide"><label htmlFor="assessment-questions">Example questions <span>*</span></label><textarea id="assessment-questions" required rows={4} value={assessmentForm.questions} onChange={(event) => setAssessmentForm({ ...assessmentForm, questions: event.target.value })} placeholder="Paste one or more questions here…" /></div>
+                  <div className="field-group field-wide question-field-group">
+                    <div className="question-label-row"><label>Example questions <span>*</span></label><button className="add-question-button" type="button" onClick={() => setAssessmentForm({ ...assessmentForm, questions: [...assessmentForm.questions, ""] })}><Plus size={14} /> Add question</button></div>
+                    <div className="question-list">
+                      {assessmentForm.questions.map((question, index) => (
+                        <div className="question-input-row" key={`question-${index}`}>
+                          <span className="question-number" aria-hidden="true">{index + 1}</span>
+                          <textarea id={`assessment-question-${index}`} rows={3} value={question} onChange={(event) => setAssessmentForm({ ...assessmentForm, questions: assessmentForm.questions.map((item, itemIndex) => itemIndex === index ? event.target.value : item) })} placeholder={index === 0 ? "e.g. State one method the Mongols used to force walled cities to surrender. [1 mark]" : "Add another question…"} aria-label={`Example question ${index + 1}`} />
+                          <button className="remove-question-button" type="button" onClick={() => setAssessmentForm({ ...assessmentForm, questions: assessmentForm.questions.filter((_, itemIndex) => itemIndex !== index) })} disabled={assessmentForm.questions.length === 1} aria-label={`Remove question ${index + 1}`}><Trash2 size={15} /></button>
+                        </div>
+                      ))}
+                    </div>
+                    <span className="field-help">Add as many separate questions as you need for this assessment.</span>
+                  </div>
                   <div className="field-group field-wide"><label htmlFor="assessment-answers">Example answers / teacher notes <span className="optional">optional</span></label><textarea id="assessment-answers" rows={4} value={assessmentForm.answers} onChange={(event) => setAssessmentForm({ ...assessmentForm, answers: event.target.value })} placeholder="Add a model answer, mark points or teaching notes…" /></div>
                 </div>
                 <div className="form-actions"><span>Fields marked * are required.</span><button className="primary-button" type="submit">Save assessment <Check size={17} /></button></div>
