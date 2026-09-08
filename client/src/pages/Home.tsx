@@ -723,9 +723,9 @@ export default function Home() {
         <section className="hero-section" id="overview">
           <div className="hero-inner">
             <div className="hero-copy">
-              <div className="overline"><Sparkles size={14} /> A shared language for better questions</div>
+              <div className="overline"><Sparkles size={14} /> A shared language for better questioning</div>
               <h1>Make every <em>command</em> count.</h1>
-              <p className="hero-intro">A practical, accessible guide to what students need to do, what strong answers look like, and how to keep classroom assessments consistent.</p>
+              <p className="hero-intro">Support for YC Social Studies Year 7-9 assessments</p>
               <div className="hero-actions">
                 <a className="primary-button" href="#library">Explore the terms <ArrowDown size={17} /></a>
                 <a className="text-button" href="#assessments">Open assessment bank <ArrowUpRight size={16} /></a>
