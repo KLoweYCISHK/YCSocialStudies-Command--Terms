@@ -42,6 +42,7 @@ type Assessment = {
   id: string;
   name: string;
   tier: TierKey;
+  tiers: TierKey[];
   yearGroup: YearGroup;
   questions: string;
   answers: string;
@@ -438,6 +439,7 @@ const starterAssessments: Assessment[] = [
     id: "mongol-empire",
     name: "Rise of the Mongol Empire",
     tier: "foundation",
+    tiers: ["foundation"],
     yearGroup: "year7",
     questions: "State one method the Mongols used to force walled cities to surrender. [1 mark]\n\nList three types of historical source that could be used to study the Mongol Empire. [3 marks]",
     answers: "Captured prisoners (hashar) were marched in front of the army.\n\nChronicles; maps; artefacts.",
@@ -447,6 +449,7 @@ const starterAssessments: Assessment[] = [
     id: "industrial-revolution-source",
     name: "Industrial Revolution source practice",
     tier: "source",
+    tiers: ["source"],
     yearGroup: "year8",
     questions: "What is the message of Source A? Use the source and your own knowledge. [8 marks]\n\nHow useful is Source A for finding out why England industrialised first? [8 marks]",
     answers: "Teacher model: start with ‘This source suggests…’ and support the interpretation with two specific details.\n\nTeacher model: content → provenance → limitations → supported judgement.",
@@ -460,7 +463,7 @@ function getStoredAssessments(): Assessment[] {
   if (typeof window === "undefined") return starterAssessments;
   try {
     const stored = window.localStorage.getItem("command-terms-assessments");
-    return stored ? JSON.parse(stored).map((assessment: Assessment) => ({ ...assessment, yearGroup: assessment.yearGroup ?? "year7" })) : starterAssessments;
+    return stored ? JSON.parse(stored).map((assessment: Assessment) => ({ ...assessment, yearGroup: assessment.yearGroup ?? "year7", tiers: assessment.tiers ?? [assessment.tier] })) : starterAssessments;
   } catch {
     return starterAssessments;
   }
@@ -509,6 +512,7 @@ function Pyramid({ activeTier, onSelect }: { activeTier: TierKey; onSelect: (tie
         ))}
       </div>
       <div className="pyramid-label pyramid-label-bottom">Everyday classroom language →</div>
+      <div className="pyramid-guidance"><ClipboardList size={16} /><span><strong>Plan across the period.</strong> Students should be assessed on every level at some point — for example, a Year 8 assessment can include both Foundation and Relational questions.</span></div>
     </div>
   );
 }
@@ -522,7 +526,7 @@ export default function Home() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [assessmentForm, setAssessmentForm] = useState({ name: "", tier: "foundation" as TierKey, yearGroup: "year7" as YearGroup, questions: [""], answers: "" });
+  const [assessmentForm, setAssessmentForm] = useState({ name: "", tiers: ["foundation"] as TierKey[], yearGroup: "year7" as YearGroup, questions: [""], answers: "" });
 
   const filteredTerms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -534,7 +538,7 @@ export default function Home() {
   }, [activeTier, searchQuery]);
 
   const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0] ?? terms.find((term) => term.tier === activeTier) ?? terms[0];
-  const visibleAssessments = assessments.filter((assessment) => assessment.tier === activeTier && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
+  const visibleAssessments = assessments.filter((assessment) => assessment.tiers.includes(activeTier) && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
 
   function selectTier(tier: TierKey) {
     setActiveTier(tier);
@@ -551,11 +555,12 @@ export default function Home() {
   function saveAssessment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const cleanedQuestions = assessmentForm.questions.map((question) => question.trim()).filter(Boolean);
-    if (!assessmentForm.name.trim() || cleanedQuestions.length === 0) return;
+    if (!assessmentForm.name.trim() || cleanedQuestions.length === 0 || assessmentForm.tiers.length === 0) return;
     const newAssessment: Assessment = {
       id: `${Date.now()}`,
       name: assessmentForm.name.trim(),
-      tier: assessmentForm.tier,
+      tier: assessmentForm.tiers[0],
+      tiers: assessmentForm.tiers,
       yearGroup: assessmentForm.yearGroup,
       questions: cleanedQuestions.join("\n\n"),
       answers: assessmentForm.answers.trim(),
@@ -564,7 +569,7 @@ export default function Home() {
     const next = [newAssessment, ...assessments];
     setAssessments(next);
     window.localStorage.setItem("command-terms-assessments", JSON.stringify(next));
-    setAssessmentForm({ name: "", tier: activeTier, yearGroup: assessmentForm.yearGroup, questions: [""], answers: "" });
+    setAssessmentForm({ name: "", tiers: [activeTier], yearGroup: assessmentForm.yearGroup, questions: [""], answers: "" });
     setShowAddForm(false);
     setSaveMessage("Assessment saved to this browser.");
     window.setTimeout(() => setSaveMessage(""), 3200);
@@ -729,7 +734,7 @@ export default function Home() {
                 <h2>Keep the <span>practice bank</span> close.</h2>
                 <p>Add assessments your department has already used, so examples sit beside the command term guidance. Everything is saved in this browser for quick staff reference.</p>
               </div>
-              <button className="primary-button add-button" type="button" onClick={() => { setShowAddForm((show) => !show); setAssessmentForm((form) => ({ ...form, tier: activeTier })); }}>
+              <button className="primary-button add-button" type="button" onClick={() => { setShowAddForm((show) => !show); setAssessmentForm((form) => ({ ...form, tiers: form.tiers.includes(activeTier) ? form.tiers : [...form.tiers, activeTier] })); }}>
                 {showAddForm ? <X size={17} /> : <Plus size={17} />} {showAddForm ? "Close form" : "Add an assessment"}
               </button>
             </div>
@@ -741,7 +746,7 @@ export default function Home() {
                 <div className="form-heading"><FilePlus2 size={19} /><div><strong>Add a team assessment</strong><span>Keep the prompt and the model answer together for future planning.</span></div></div>
                 <div className="form-grid">
                   <div className="field-group"><label htmlFor="assessment-name">Assessment name <span>*</span></label><input id="assessment-name" required value={assessmentForm.name} onChange={(event) => setAssessmentForm({ ...assessmentForm, name: event.target.value })} placeholder="e.g. Rise of the Mongol Empire" /></div>
-                  <div className="field-group"><label htmlFor="assessment-tier">Thinking level</label><select id="assessment-tier" value={assessmentForm.tier} onChange={(event) => setAssessmentForm({ ...assessmentForm, tier: event.target.value as TierKey })}>{tierOrder.map((tier) => <option key={tier} value={tier}>{tierMeta[tier].label}</option>)}</select></div>
+                  <div className="field-group field-wide"><label>Thinking levels <span>*</span></label><div className="level-tag-options" role="group" aria-label="Thinking levels included in this assessment">{tierOrder.map((tier) => { const isSelected = assessmentForm.tiers.includes(tier); return <button key={tier} type="button" className={`level-tag-option ${isSelected ? `is-selected level-tag-${tier}` : ""}`} onClick={() => setAssessmentForm({ ...assessmentForm, tiers: isSelected ? (assessmentForm.tiers.length > 1 ? assessmentForm.tiers.filter((item) => item !== tier) : assessmentForm.tiers) : [...assessmentForm.tiers, tier] })} aria-pressed={isSelected}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].label}{isSelected && <Check size={14} />}</button>; })}</div><span className="field-help">Select every level represented in the assessment — for example, Year 8 may include Foundation and Relational questions.</span></div>
                   <div className="field-group"><label htmlFor="assessment-year">Year group</label><select id="assessment-year" value={assessmentForm.yearGroup} onChange={(event) => setAssessmentForm({ ...assessmentForm, yearGroup: event.target.value as YearGroup })}>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select></div>
                   <div className="field-group field-wide question-field-group">
                     <div className="question-label-row"><label>Example questions <span>*</span></label><button className="add-question-button" type="button" onClick={() => setAssessmentForm({ ...assessmentForm, questions: [...assessmentForm.questions, ""] })}><Plus size={14} /> Add question</button></div>
@@ -764,7 +769,7 @@ export default function Home() {
 
             <div className="assessment-toolbar">
               <div className="mini-tabs" role="tablist" aria-label="Assessment examples by level">
-                {tierOrder.map((tier) => <button key={tier} type="button" className={`mini-tab ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier)}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].shortLabel}<b>{assessments.filter((assessment) => assessment.tier === tier).length}</b></button>)}
+                {tierOrder.map((tier) => <button key={tier} type="button" className={`mini-tab ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier)}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].shortLabel}<b>{assessments.filter((assessment) => assessment.tiers.includes(tier)).length}</b></button>)}
               </div>
               <div className="assessment-filters"><label htmlFor="year-filter">Show</label><select id="year-filter" value={activeYearGroup} onChange={(event) => setActiveYearGroup(event.target.value as YearGroup | "all")}><option value="all">All year groups</option>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select><span>{visibleAssessments.length} saved {visibleAssessments.length === 1 ? "example" : "examples"}</span></div>
             </div>
@@ -775,7 +780,7 @@ export default function Home() {
               <div className="assessment-grid">
                 {visibleAssessments.map((assessment) => (
                   <article className="assessment-card" key={assessment.id}>
-                    <div className="assessment-card-top"><div className="assessment-badges"><TierBadge tier={assessment.tier} /><span className="year-badge">{yearGroupLabels[assessment.yearGroup]}</span></div><span className="saved-date">Saved {assessment.createdAt}</span></div>
+                    <div className="assessment-card-top"><div className="assessment-badges">{assessment.tiers.map((tier) => <TierBadge tier={tier} key={tier} />)}<span className="year-badge">{yearGroupLabels[assessment.yearGroup]}</span></div><span className="saved-date">Saved {assessment.createdAt}</span></div>
                     <h3>{assessment.name}</h3>
                     <div className="assessment-part"><span className="part-label">QUESTIONS</span><p>{assessment.questions}</p></div>
                     <div className="assessment-part answer-part"><span className="part-label">ANSWERS / NOTES</span><p>{assessment.answers || "No answer notes added yet."}</p></div>
