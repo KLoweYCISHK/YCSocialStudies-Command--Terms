@@ -78,10 +78,10 @@ const tierMeta: Record<
   source: {
     label: "Evaluative command terms",
     shortLabel: "Evaluative",
-    kicker: "Interpret & judge",
+    kicker: "Judge & weigh",
     color: "plum",
     soft: "plum-soft",
-    description: "Reach supported judgements about message, purpose, context and usefulness.",
+    description: "Reach supported judgements by weighing evidence, viewpoints and significance.",
   },
 };
 
@@ -300,7 +300,7 @@ const terms: Term[] = [
   {
     id: "justify",
     label: "Justify",
-    tier: "relational",
+    tier: "source",
     eyebrow: "3 · Defend a position",
     summary: "Support a viewpoint, decision or claim with reasons, explaining why those reasons are convincing.",
     ask: "Take a clear position early, then build the case for why it is the strongest choice or most important factor.",
@@ -346,7 +346,7 @@ const terms: Term[] = [
   {
     id: "discuss",
     label: "Discuss",
-    tier: "relational",
+    tier: "source",
     eyebrow: "6 · Weigh both sides",
     summary: "Present more than one side of an issue, develop each side, and reach a supported conclusion.",
     ask: "A one-sided answer, however detailed, has not fully answered Discuss. The conclusion must weigh the arguments rather than simply repeat one.",
@@ -364,7 +364,7 @@ const terms: Term[] = [
   {
     id: "analyse",
     label: "Analyse",
-    tier: "relational",
+    tier: "source",
     eyebrow: "7 · Examine & rank",
     summary: "Break a topic into parts, examine relationships and judge which factor or impact matters most.",
     ask: "Analyse goes beyond Explain: the answer must weigh relative significance and justify a ranking, with evidence throughout.",
@@ -382,7 +382,7 @@ const terms: Term[] = [
   {
     id: "message",
     label: "What is the message?",
-    tier: "source",
+    tier: "relational",
     eyebrow: "7 · Interpret the source",
     summary: "Identify the overall point a source is trying to make, beyond its literal content.",
     ask: "State the message directly — ‘This source suggests that…’ — and support it with specific details, symbols, captions or word choices.",
@@ -400,7 +400,7 @@ const terms: Term[] = [
   {
     id: "produced",
     label: "Why produced at this time?",
-    tier: "source",
+    tier: "relational",
     eyebrow: "8 · Purpose + context",
     summary: "Explain the purpose behind a source’s creation and link that purpose to the specific moment it was made.",
     ask: "Bring in contextual knowledge: what was happening then, who was the source aimed at, and what prompted its creation?",
@@ -417,7 +417,7 @@ const terms: Term[] = [
   {
     id: "useful",
     label: "How useful is this source?",
-    tier: "source",
+    tier: "relational",
     eyebrow: "9 · Evaluate usefulness",
     summary: "Weigh content, provenance and limitations to reach a judgement about usefulness for a specific purpose.",
     ask: "Consider what the source says, who made it, when and why, then explain what that means for how useful it is — not just whether it is biased.",
