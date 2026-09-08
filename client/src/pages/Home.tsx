@@ -73,15 +73,15 @@ const tierMeta: Record<
     kicker: "Connect & reason",
     color: "teal",
     soft: "teal-soft",
-    description: "PEEL-ready responses that connect causes, effects, viewpoints and judgements.",
+    description: "PEEL-ready responses that connect causes, effects, viewpoints and source evidence.",
   },
   source: {
-    label: "Source evaluation",
-    shortLabel: "Source skills",
-    kicker: "Interpret & evaluate",
+    label: "Evaluative command terms",
+    shortLabel: "Evaluative",
+    kicker: "Interpret & judge",
     color: "plum",
     soft: "plum-soft",
-    description: "Read beyond the surface: interpret message, purpose, context and usefulness.",
+    description: "Reach supported judgements about message, purpose, context and usefulness.",
   },
 };
 
@@ -104,7 +104,7 @@ const terms: Term[] = [
   {
     id: "identify-source",
     label: "Identify · source",
-    tier: "foundation",
+    tier: "relational",
     eyebrow: "2 · Pull from a source",
     summary: "Find specific points directly in a source, without adding outside knowledge.",
     ask: "The number of marks tells students how many separate points to find. Accept paraphrasing, but each point must be traceable to the source.",
@@ -132,7 +132,7 @@ const terms: Term[] = [
   {
     id: "describe-source",
     label: "Describe · source",
-    tier: "foundation",
+    tier: "relational",
     eyebrow: "4 · See & say",
     summary: "Turn what you can see in a diagram, photograph, map or artefact into full descriptive sentences.",
     ask: "Each point should name a feature and add something specific about it. This is more developed than a label or a short identification.",
@@ -237,7 +237,7 @@ const terms: Term[] = [
   {
     id: "outline-source",
     label: "Outline · source / diagram",
-    tier: "foundation",
+    tier: "relational",
     eyebrow: "11 · Report a trend",
     summary: "Give a brief, accurate account of a trend, change or pattern using specific detail directly from a source.",
     ask: "Because the information is visible, the skill is accurate reading and reporting rather than recall.",
