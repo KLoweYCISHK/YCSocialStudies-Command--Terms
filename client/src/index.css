@@ -28,13 +28,13 @@
   --foreground: #1d2630;
   --card: #ffffff;
   --card-foreground: #1d2630;
-  --primary: #ec725c;
+  --primary: #e51c46;
   --primary-foreground: #ffffff;
   --secondary: #edf4f2;
   --secondary-foreground: #173e43;
   --muted: #eef0ee;
   --muted-foreground: #617078;
-  --accent: #f1e9dc;
+  --accent: #fff5d9;
   --accent-foreground: #4a3a2f;
   --border: #dce2dd;
   --input: #dce2dd;
@@ -44,16 +44,16 @@
   --ink-soft: #53616a;
   --paper: #f9f8f4;
   --paper-deep: #f0eee7;
-  --coral: #ec725c;
-  --coral-dark: #bd5547;
-  --coral-soft: #fff0eb;
-  --teal: #2f7a79;
-  --teal-dark: #1d5c5e;
-  --teal-soft: #e7f3f0;
-  --plum: #806080;
-  --plum-dark: #654565;
-  --plum-soft: #f1eaf2;
-  --gold: #d49a4b;
+  --coral: #e51c46;
+  --coral-dark: #b81135;
+  --coral-soft: #fff0f3;
+  --teal: #0047ab;
+  --teal-dark: #003b8f;
+  --teal-soft: #eaf1ff;
+  --plum: #f2a900;
+  --plum-dark: #8b5f00;
+  --plum-soft: #fff5d9;
+  --gold: #f2a900;
   --line: #dfe4df;
   --shadow: 0 15px 45px rgba(45, 54, 50, 0.08);
   --shadow-soft: 0 6px 20px rgba(45, 54, 50, 0.06);
@@ -89,7 +89,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .brand > span:last-child { display: grid; line-height: 1.05; gap: 4px; }
 .brand strong { font-family: "DM Serif Display", Georgia, serif; font-size: 19px; font-weight: 400; letter-spacing: -0.02em; }
 .brand small { color: #738087; font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; }
-.app-mark { width: 31px; height: 31px; display: grid; align-content: center; gap: 3px; padding: 5px 4px; border-radius: 7px 7px 11px 11px; background: var(--ink); transform: rotate(-3deg); box-shadow: 4px 4px 0 var(--coral); }
+.app-mark { width: 47px; height: 39px; display: grid; place-items: center; overflow: hidden; border-radius: 8px; background: white; transform: rotate(-2deg); box-shadow: 4px 4px 0 var(--coral); }
+.app-mark img { width: 56px; height: auto; display: block; }
 .app-mark-bar { display: block; height: 3px; border-radius: 4px; background: #f5f0e4; }
 .app-mark-bar-one { width: 13px; } .app-mark-bar-two { width: 18px; } .app-mark-bar-three { width: 22px; }
 .site-nav { display: flex; align-items: center; gap: 27px; color: #67737a; font-size: 13px; font-weight: 700; }

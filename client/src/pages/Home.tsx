@@ -459,9 +459,7 @@ function getStoredAssessments(): Assessment[] {
 function AppMark() {
   return (
     <div className="app-mark" aria-hidden="true">
-      <span className="app-mark-bar app-mark-bar-one" />
-      <span className="app-mark-bar app-mark-bar-two" />
-      <span className="app-mark-bar app-mark-bar-three" />
+      <img src="/manus-storage/YCYW_05ccf744.png" alt="" />
     </div>
   );
 }
@@ -570,11 +568,11 @@ export default function Home() {
       <a className="skip-link" href="#library">Skip to command-term library</a>
       <header className="site-header">
         <div className="header-inner">
-          <a className="brand" href="#top" aria-label="Command Terms Hub home">
+          <a className="brand" href="#top" aria-label="YC Social Studies Assessments home">
             <AppMark />
             <span>
-              <strong>Command Terms</strong>
-              <small>Staff reference hub</small>
+              <strong>YC Social Studies</strong>
+              <small>Assessments</small>
             </span>
           </a>
           <button className="mobile-menu-button" type="button" onClick={() => setMobileMenuOpen((open) => !open)} aria-label="Toggle navigation" aria-expanded={mobileMenuOpen}>
@@ -767,7 +765,7 @@ export default function Home() {
           <div className="content-width footer-cta-inner"><div><span className="overline"><Sparkles size={14} /> Ready when you are</span><h2>Start with the shape.<br /><em>Then sharpen the question.</em></h2></div><a className="primary-button light-button" href="#top">Back to top <ArrowUpRight size={17} /></a></div>
         </section>
       </main>
-      <footer className="site-footer"><div className="content-width"><span>Command Terms Hub</span><span>Built for shared planning • saved locally in your browser</span></div></footer>
+      <footer className="site-footer"><div className="content-width"><span>YC Social Studies Assessments</span><span>Built for shared planning • saved locally in your browser</span></div></footer>
     </div>
   );
 }
