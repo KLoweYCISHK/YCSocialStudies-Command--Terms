@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 type TierKey = "foundation" | "relational" | "source";
+type YearGroup = "year7" | "year8" | "year9";
 
 type RubricRow = {
   marks: string;
@@ -41,9 +42,16 @@ type Assessment = {
   id: string;
   name: string;
   tier: TierKey;
+  yearGroup: YearGroup;
   questions: string;
   answers: string;
   createdAt: string;
+};
+
+const yearGroupLabels: Record<YearGroup, string> = {
+  year7: "Year 7",
+  year8: "Year 8",
+  year9: "Year 9",
 };
 
 const tierMeta: Record<
@@ -430,6 +438,7 @@ const starterAssessments: Assessment[] = [
     id: "mongol-empire",
     name: "Rise of the Mongol Empire",
     tier: "foundation",
+    yearGroup: "year7",
     questions: "State one method the Mongols used to force walled cities to surrender. [1 mark]\n\nList three types of historical source that could be used to study the Mongol Empire. [3 marks]",
     answers: "Captured prisoners (hashar) were marched in front of the army.\n\nChronicles; maps; artefacts.",
     createdAt: "08 Sep 2026",
@@ -438,6 +447,7 @@ const starterAssessments: Assessment[] = [
     id: "industrial-revolution-source",
     name: "Industrial Revolution source practice",
     tier: "source",
+    yearGroup: "year8",
     questions: "What is the message of Source A? Use the source and your own knowledge. [8 marks]\n\nHow useful is Source A for finding out why England industrialised first? [8 marks]",
     answers: "Teacher model: start with ‘This source suggests…’ and support the interpretation with two specific details.\n\nTeacher model: content → provenance → limitations → supported judgement.",
     createdAt: "08 Sep 2026",
@@ -450,7 +460,7 @@ function getStoredAssessments(): Assessment[] {
   if (typeof window === "undefined") return starterAssessments;
   try {
     const stored = window.localStorage.getItem("command-terms-assessments");
-    return stored ? JSON.parse(stored) : starterAssessments;
+    return stored ? JSON.parse(stored).map((assessment: Assessment) => ({ ...assessment, yearGroup: assessment.yearGroup ?? "year7" })) : starterAssessments;
   } catch {
     return starterAssessments;
   }
@@ -508,10 +518,11 @@ export default function Home() {
   const [selectedTermId, setSelectedTermId] = useState("define");
   const [searchQuery, setSearchQuery] = useState("");
   const [assessments, setAssessments] = useState<Assessment[]>(getStoredAssessments);
+  const [activeYearGroup, setActiveYearGroup] = useState<YearGroup | "all">("all");
   const [showAddForm, setShowAddForm] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [assessmentForm, setAssessmentForm] = useState({ name: "", tier: "foundation" as TierKey, questions: "", answers: "" });
+  const [assessmentForm, setAssessmentForm] = useState({ name: "", tier: "foundation" as TierKey, yearGroup: "year7" as YearGroup, questions: "", answers: "" });
 
   const filteredTerms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -523,7 +534,7 @@ export default function Home() {
   }, [activeTier, searchQuery]);
 
   const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0] ?? terms.find((term) => term.tier === activeTier) ?? terms[0];
-  const visibleAssessments = assessments.filter((assessment) => assessment.tier === activeTier);
+  const visibleAssessments = assessments.filter((assessment) => assessment.tier === activeTier && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
 
   function selectTier(tier: TierKey) {
     setActiveTier(tier);
@@ -544,6 +555,7 @@ export default function Home() {
       id: `${Date.now()}`,
       name: assessmentForm.name.trim(),
       tier: assessmentForm.tier,
+      yearGroup: assessmentForm.yearGroup,
       questions: assessmentForm.questions.trim(),
       answers: assessmentForm.answers.trim(),
       createdAt: new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
@@ -551,7 +563,7 @@ export default function Home() {
     const next = [newAssessment, ...assessments];
     setAssessments(next);
     window.localStorage.setItem("command-terms-assessments", JSON.stringify(next));
-    setAssessmentForm({ name: "", tier: activeTier, questions: "", answers: "" });
+    setAssessmentForm({ name: "", tier: activeTier, yearGroup: assessmentForm.yearGroup, questions: "", answers: "" });
     setShowAddForm(false);
     setSaveMessage("Assessment saved to this browser.");
     window.setTimeout(() => setSaveMessage(""), 3200);
@@ -729,6 +741,7 @@ export default function Home() {
                 <div className="form-grid">
                   <div className="field-group"><label htmlFor="assessment-name">Assessment name <span>*</span></label><input id="assessment-name" required value={assessmentForm.name} onChange={(event) => setAssessmentForm({ ...assessmentForm, name: event.target.value })} placeholder="e.g. Rise of the Mongol Empire" /></div>
                   <div className="field-group"><label htmlFor="assessment-tier">Thinking level</label><select id="assessment-tier" value={assessmentForm.tier} onChange={(event) => setAssessmentForm({ ...assessmentForm, tier: event.target.value as TierKey })}>{tierOrder.map((tier) => <option key={tier} value={tier}>{tierMeta[tier].label}</option>)}</select></div>
+                  <div className="field-group"><label htmlFor="assessment-year">Year group</label><select id="assessment-year" value={assessmentForm.yearGroup} onChange={(event) => setAssessmentForm({ ...assessmentForm, yearGroup: event.target.value as YearGroup })}>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select></div>
                   <div className="field-group field-wide"><label htmlFor="assessment-questions">Example questions <span>*</span></label><textarea id="assessment-questions" required rows={4} value={assessmentForm.questions} onChange={(event) => setAssessmentForm({ ...assessmentForm, questions: event.target.value })} placeholder="Paste one or more questions here…" /></div>
                   <div className="field-group field-wide"><label htmlFor="assessment-answers">Example answers / teacher notes <span className="optional">optional</span></label><textarea id="assessment-answers" rows={4} value={assessmentForm.answers} onChange={(event) => setAssessmentForm({ ...assessmentForm, answers: event.target.value })} placeholder="Add a model answer, mark points or teaching notes…" /></div>
                 </div>
@@ -740,7 +753,7 @@ export default function Home() {
               <div className="mini-tabs" role="tablist" aria-label="Assessment examples by level">
                 {tierOrder.map((tier) => <button key={tier} type="button" className={`mini-tab ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier)}><span className={`mini-dot mini-dot-${tier}`} />{tierMeta[tier].shortLabel}<b>{assessments.filter((assessment) => assessment.tier === tier).length}</b></button>)}
               </div>
-              <span>{visibleAssessments.length} saved {visibleAssessments.length === 1 ? "example" : "examples"}</span>
+              <div className="assessment-filters"><label htmlFor="year-filter">Show</label><select id="year-filter" value={activeYearGroup} onChange={(event) => setActiveYearGroup(event.target.value as YearGroup | "all")}><option value="all">All year groups</option>{(Object.keys(yearGroupLabels) as YearGroup[]).map((yearGroup) => <option key={yearGroup} value={yearGroup}>{yearGroupLabels[yearGroup]}</option>)}</select><span>{visibleAssessments.length} saved {visibleAssessments.length === 1 ? "example" : "examples"}</span></div>
             </div>
 
             {visibleAssessments.length === 0 ? (
@@ -749,7 +762,7 @@ export default function Home() {
               <div className="assessment-grid">
                 {visibleAssessments.map((assessment) => (
                   <article className="assessment-card" key={assessment.id}>
-                    <div className="assessment-card-top"><TierBadge tier={assessment.tier} /><span className="saved-date">Saved {assessment.createdAt}</span></div>
+                    <div className="assessment-card-top"><div className="assessment-badges"><TierBadge tier={assessment.tier} /><span className="year-badge">{yearGroupLabels[assessment.yearGroup]}</span></div><span className="saved-date">Saved {assessment.createdAt}</span></div>
                     <h3>{assessment.name}</h3>
                     <div className="assessment-part"><span className="part-label">QUESTIONS</span><p>{assessment.questions}</p></div>
                     <div className="assessment-part answer-part"><span className="part-label">ANSWERS / NOTES</span><p>{assessment.answers || "No answer notes added yet."}</p></div>
