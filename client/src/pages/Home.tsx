@@ -542,6 +542,17 @@ const starterAssessments: Assessment[] = [
 
 const tierOrder: TierKey[] = ["foundation", "relational", "source"];
 const tierRank: Record<TierKey, number> = { foundation: 1, relational: 2, source: 3 };
+const termAssignmentsStorageKey = "yc-social-studies-term-assignments";
+
+function getStoredTerms(): Term[] {
+  if (typeof window === "undefined") return terms;
+  try {
+    const savedAssignments = JSON.parse(window.localStorage.getItem(termAssignmentsStorageKey) ?? "{}");
+    return terms.map((term) => savedAssignments[term.id] ? { ...term, tier: savedAssignments[term.id] as TierKey } : term);
+  } catch {
+    return terms;
+  }
+}
 
 function highestTier(tiers: TierKey[]): TierKey {
   return tiers.reduce((highest, tier) => tierRank[tier] > tierRank[highest] ? tier : highest, tiers[0] ?? "foundation");
@@ -608,6 +619,9 @@ function Pyramid({ activeTier, onSelect }: { activeTier: TierKey; onSelect: (tie
 export default function Home() {
   const [activeTier, setActiveTier] = useState<TierKey>("foundation");
   const [selectedTermId, setSelectedTermId] = useState("define");
+  const [termLibrary, setTermLibrary] = useState<Term[]>(getStoredTerms);
+  const [termDraft, setTermDraft] = useState<Term[]>(getStoredTerms);
+  const [showTermManager, setShowTermManager] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [assessments, setAssessments] = useState<Assessment[]>(getStoredAssessments);
   const [activeYearGroup, setActiveYearGroup] = useState<YearGroup | "all">("all");
@@ -619,19 +633,19 @@ export default function Home() {
 
   const filteredTerms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return terms.filter((term) => {
+    return termLibrary.filter((term) => {
       const matchesTier = term.tier === activeTier;
       const matchesQuery = !query || [term.label, term.summary, term.ask, ...term.examples].join(" ").toLowerCase().includes(query);
       return matchesTier && matchesQuery;
     });
-  }, [activeTier, searchQuery]);
+  }, [activeTier, searchQuery, termLibrary]);
 
-  const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0] ?? terms.find((term) => term.tier === activeTier) ?? terms[0];
+  const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0];
   const visibleAssessments = assessments.filter((assessment) => highestTier(assessment.tiers) === activeTier && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
 
   function selectTier(tier: TierKey, shouldScroll = true) {
     setActiveTier(tier);
-    const next = terms.find((term) => term.tier === tier);
+    const next = termLibrary.find((term) => term.tier === tier);
     if (next) setSelectedTermId(next.id);
     if (shouldScroll) window.setTimeout(() => document.getElementById("library")?.scrollIntoView({ behavior: "smooth", block: "start" }), 20);
   }
@@ -639,6 +653,33 @@ export default function Home() {
   function selectTerm(term: Term) {
     setSelectedTermId(term.id);
     setActiveTier(term.tier);
+  }
+
+  function openTermManager() {
+    setTermDraft(termLibrary);
+    setShowTermManager((open) => !open);
+  }
+
+  function updateDraftTermTier(termId: string, tier: TierKey) {
+    setTermDraft((draft) => draft.map((term) => term.id === termId ? { ...term, tier } : term));
+  }
+
+  function saveTermAssignments() {
+    const assignments = Object.fromEntries(termDraft.map((term) => [term.id, term.tier]));
+    setTermLibrary(termDraft);
+    window.localStorage.setItem(termAssignmentsStorageKey, JSON.stringify(assignments));
+    setShowTermManager(false);
+    setSaveMessage("Command-term levels saved in this browser.");
+    window.setTimeout(() => setSaveMessage(""), 3200);
+  }
+
+  function resetTermAssignments() {
+    setTermDraft(terms);
+    setTermLibrary(terms);
+    window.localStorage.removeItem(termAssignmentsStorageKey);
+    setShowTermManager(false);
+    setSaveMessage("Command-term levels reset to the school framework.");
+    window.setTimeout(() => setSaveMessage(""), 3200);
   }
 
   function saveAssessment(event: FormEvent<HTMLFormElement>) {
@@ -772,11 +813,13 @@ export default function Home() {
                 <div className="section-label">The reference library</div>
                 <h2>Browse by <span>thinking level.</span></h2>
               </div>
-              <div className="search-wrap">
-                <Search size={18} aria-hidden="true" />
-                <label className="sr-only" htmlFor="term-search">Search command terms</label>
-                <input id="term-search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search the library…" />
-                {searchQuery && <button type="button" className="clear-search" onClick={() => setSearchQuery("")} aria-label="Clear search"><X size={16} /></button>}
+              <div className="library-heading-actions">
+                <div className="search-wrap">
+                  <Search size={18} aria-hidden="true" />
+                  <label className="sr-only" htmlFor="term-search">Search command terms</label>
+                  <input id="term-search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search the library…" />
+                  {searchQuery && <button type="button" className="clear-search" onClick={() => setSearchQuery("")} aria-label="Clear search"><X size={16} /></button>}
+                </div>
               </div>
             </div>
 
@@ -784,7 +827,7 @@ export default function Home() {
               <div className="tier-tabs" role="tablist" aria-label="Filter command terms by level">
                 {tierOrder.map((tier) => (
                   <button key={tier} type="button" role="tab" aria-selected={activeTier === tier} className={`tier-tab tier-tab-${tier} ${activeTier === tier ? "is-active" : ""}`} onClick={() => selectTier(tier)}>
-                    <span className="tab-dot" />{tierMeta[tier].label}<span className="tab-count">{terms.filter((term) => term.tier === tier).length}</span>
+                    <span className="tab-dot" />{tierMeta[tier].label}<span className="tab-count">{termLibrary.filter((term) => term.tier === tier).length}</span>
                   </button>
                 ))}
               </div>
@@ -808,7 +851,7 @@ export default function Home() {
                 <article className={`term-detail detail-${selectedTerm.tier}`} aria-live="polite">
                   <div className="detail-header">
                     <div><TierBadge tier={selectedTerm.tier} /><p className="detail-eyebrow">{selectedTerm.eyebrow}</p></div>
-                    <span className="detail-id">{String(terms.findIndex((term) => term.id === selectedTerm.id) + 1).padStart(2, "0")}</span>
+                    <span className="detail-id">{String(termLibrary.findIndex((term) => term.id === selectedTerm.id) + 1).padStart(2, "0")}</span>
                   </div>
                   <h3>{selectedTerm.label}</h3>
                   <p className="detail-summary">{selectedTerm.summary}</p>
