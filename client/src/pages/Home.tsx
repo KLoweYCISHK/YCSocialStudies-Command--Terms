@@ -845,7 +845,6 @@ export default function Home() {
               <div>
                 <div className="section-label">Your team’s examples</div>
                 <h2>Keep the <span>practice bank</span> close.</h2>
-                <p>Add assessments your department has already used, so examples sit beside the command term guidance. Everything is saved in this browser for quick staff reference. When an assessment has more than one level tag, it is filed under its highest level.</p>
               </div>
               <button className="primary-button add-button" type="button" onClick={() => showAddForm ? closeAssessmentForm() : startNewAssessment()}>
                 {showAddForm ? <X size={17} /> : <Plus size={17} />} {showAddForm ? "Close form" : "Add an assessment"}
