@@ -206,6 +206,10 @@ function vitePluginStorageProxy(): Plugin {
 const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime(), vitePluginManusDebugCollector(), vitePluginStorageProxy()];
 
 export default defineConfig({
+  // When building for GitHub Pages the site is served from a project subpath
+  // (https://<user>.github.io/<repo>/), so assets need that prefix baked in.
+  // Locally / in the Manus environment this stays "/".
+  base: process.env.GITHUB_PAGES === "true" ? "/YCSocialStudies-Command--Terms/" : "/",
   plugins,
   resolve: {
     alias: {
