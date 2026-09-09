@@ -159,6 +159,30 @@ h2 span { color: var(--coral); }
 .search-wrap { position: relative; width: 265px; display: flex; align-items: center; gap: 9px; padding: 10px 13px; border-bottom: 1px solid #9faeaa; color: #7a8989; }
 .search-wrap input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 13px; }
 .search-wrap input::placeholder { color: #899493; }
+.library-heading-actions { display: flex; align-items: center; gap: 14px; }
+.outline-button { display: inline-flex; align-items: center; gap: 7px; padding: 10px 12px; border: 1px solid #b9cbc5; border-radius: 6px; background: white; color: var(--teal-dark); font-size: 12px; font-weight: 800; }
+.outline-button:hover { border-color: var(--teal); background: var(--teal-soft); }
+.admin-term-panel { margin-top: 22px; border: 1px solid #c7d6d0; border-radius: 10px; background: #f8fbfa; box-shadow: 0 10px 25px rgba(26,61,62,.08); overflow: hidden; }
+.admin-login, .admin-editor { padding: 20px; }
+.admin-panel-heading { display: flex; align-items: flex-start; gap: 10px; color: var(--teal-dark); }
+.admin-panel-heading > svg { flex: 0 0 auto; margin-top: 2px; }
+.admin-panel-heading div { display: grid; gap: 4px; flex: 1; }
+.admin-panel-heading strong { font-size: 14px; }
+.admin-panel-heading span { color: #637775; font-size: 12px; line-height: 1.45; }
+.admin-login-row { display: flex; align-items: end; gap: 10px; max-width: 620px; margin-top: 18px; }
+.admin-login-row label { display: grid; gap: 6px; color: #405a5b; font-size: 12px; font-weight: 800; }
+.admin-login-row input { width: 220px; border: 1px solid #cbd8d2; border-radius: 6px; padding: 10px 11px; color: var(--ink); outline: 0; }
+.admin-login-row input:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(47,122,121,.12); }
+.admin-error { margin-top: 10px; color: #b33154; font-size: 12px; font-weight: 800; }
+.admin-editor-grid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; margin-top: 20px; padding-top: 18px; border-top: 1px solid #d5e1dd; }
+.admin-term-picker { display: grid; align-content: start; gap: 7px; }
+.admin-term-picker label { color: #405a5b; font-size: 12px; font-weight: 800; }
+.admin-term-picker select { width: 100%; border: 1px solid #cbd8d2; border-radius: 6px; padding: 10px 11px; background: white; color: var(--ink); }
+.admin-term-picker p { margin: 2px 0 0; color: #73827f; font-size: 11px; line-height: 1.45; }
+.admin-term-fields { display: grid; gap: 13px; }
+.admin-fields-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+.admin-editor-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid #d5e1dd; }
+.admin-lock-button { margin-left: auto; }
 .clear-search { display: inline-grid; place-items: center; padding: 2px; border: 0; background: transparent; color: #7b8989; cursor: pointer; }
 .library-toolbar { display: flex; justify-content: space-between; gap: 20px; align-items: center; margin: 46px 0 22px; }
 .tier-tabs { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
@@ -304,7 +328,7 @@ h2 span { color: var(--coral); }
   .visual-note { margin: 0 0 17px; font-size: 17px; } .pyramid-segment { min-height: 72px; padding: 11px 12px; grid-template-columns: 31px 1fr 18px; } .pyramid-segment strong { font-size: 21px; }
   .orientation-section, .library-section, .assessment-section { padding: 72px 0 78px; }
   h2 { font-size: 42px; } .orientation-copy > p { font-size: 14px; }
-  .section-heading-row, .assessment-intro { display: block; } .search-wrap { width: 100%; margin-top: 25px; } .library-toolbar { display: block; margin-top: 32px; } .result-count { display: block; margin-top: 13px; }
+  .section-heading-row, .assessment-intro { display: block; } .library-heading-actions { display: grid; gap: 12px; margin-top: 25px; } .search-wrap { width: 100%; } .manage-terms-button { justify-self: start; } .library-toolbar { display: block; margin-top: 32px; } .result-count { display: block; margin-top: 13px; } .admin-login-row, .admin-editor-grid { display: grid; grid-template-columns: 1fr; align-items: stretch; } .admin-login-row input { width: 100%; } .admin-fields-row { grid-template-columns: 1fr; } .admin-editor-actions { align-items: stretch; flex-direction: column; } .admin-lock-button { margin-left: 0; }
   .tier-tabs { gap: 3px; } .tier-tab { padding: 8px 9px; font-size: 11px; }
   .term-list { grid-template-columns: 1fr; } .term-detail { padding: 24px 19px 22px; } .detail-columns { grid-template-columns: 1fr; gap: 23px; } .term-detail h3 { font-size: 38px; }
   .rubric-row { grid-template-columns: 76px 1fr; } .rubric-row > span { padding: 9px 10px; }

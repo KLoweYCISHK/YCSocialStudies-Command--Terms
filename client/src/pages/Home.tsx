@@ -9,11 +9,16 @@ import {
   ClipboardList,
   FilePlus2,
   Lightbulb,
+  Lock,
   Menu,
+  Pencil,
   Plus,
+  Save,
   Search,
   Sparkles,
+  ShieldCheck,
   Trash2,
+  Unlock,
   X,
 } from "lucide-react";
 
@@ -543,10 +548,14 @@ const starterAssessments: Assessment[] = [
 const tierOrder: TierKey[] = ["foundation", "relational", "source"];
 const tierRank: Record<TierKey, number> = { foundation: 1, relational: 2, source: 3 };
 const termAssignmentsStorageKey = "yc-social-studies-term-assignments";
+const termLibraryStorageKey = "yc-social-studies-term-library";
+const adminPinHash = "10b8016bfb8615527325735dabc53be6723a04d4906423b15adb6a2c1dbc658e";
 
 function getStoredTerms(): Term[] {
   if (typeof window === "undefined") return terms;
   try {
+    const savedLibrary = window.localStorage.getItem(termLibraryStorageKey);
+    if (savedLibrary) return JSON.parse(savedLibrary) as Term[];
     const savedAssignments = JSON.parse(window.localStorage.getItem(termAssignmentsStorageKey) ?? "{}");
     return terms.map((term) => savedAssignments[term.id] ? { ...term, tier: savedAssignments[term.id] as TierKey } : term);
   } catch {
@@ -622,6 +631,10 @@ export default function Home() {
   const [termLibrary, setTermLibrary] = useState<Term[]>(getStoredTerms);
   const [termDraft, setTermDraft] = useState<Term[]>(getStoredTerms);
   const [showTermManager, setShowTermManager] = useState(false);
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminPin, setAdminPin] = useState("");
+  const [adminError, setAdminError] = useState("");
+  const [adminEditTermId, setAdminEditTermId] = useState("define");
   const [searchQuery, setSearchQuery] = useState("");
   const [assessments, setAssessments] = useState<Assessment[]>(getStoredAssessments);
   const [activeYearGroup, setActiveYearGroup] = useState<YearGroup | "all">("all");
@@ -642,6 +655,7 @@ export default function Home() {
 
   const selectedTerm = filteredTerms.find((term) => term.id === selectedTermId) ?? filteredTerms[0];
   const visibleAssessments = assessments.filter((assessment) => highestTier(assessment.tiers) === activeTier && (activeYearGroup === "all" || assessment.yearGroup === activeYearGroup));
+  const adminEditingTerm = termDraft.find((term) => term.id === adminEditTermId) ?? termDraft[0];
 
   function selectTier(tier: TierKey, shouldScroll = true) {
     setActiveTier(tier);
@@ -667,6 +681,7 @@ export default function Home() {
   function saveTermAssignments() {
     const assignments = Object.fromEntries(termDraft.map((term) => [term.id, term.tier]));
     setTermLibrary(termDraft);
+    window.localStorage.setItem(termLibraryStorageKey, JSON.stringify(termDraft));
     window.localStorage.setItem(termAssignmentsStorageKey, JSON.stringify(assignments));
     setShowTermManager(false);
     setSaveMessage("Command-term levels saved in this browser.");
@@ -676,10 +691,30 @@ export default function Home() {
   function resetTermAssignments() {
     setTermDraft(terms);
     setTermLibrary(terms);
+    window.localStorage.removeItem(termLibraryStorageKey);
     window.localStorage.removeItem(termAssignmentsStorageKey);
     setShowTermManager(false);
     setSaveMessage("Command-term levels reset to the school framework.");
     window.setTimeout(() => setSaveMessage(""), 3200);
+  }
+
+  async function unlockAdmin(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(adminPin));
+    const hash = Array.from(new Uint8Array(digest)).map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    if (hash === adminPinHash) {
+      setAdminUnlocked(true);
+      setAdminPin("");
+      setAdminError("");
+      setTermDraft(termLibrary);
+      setAdminEditTermId(termLibrary[0]?.id ?? "");
+    } else {
+      setAdminError("That PIN was not recognised.");
+    }
+  }
+
+  function updateDraftTerm(termId: string, changes: Partial<Term>) {
+    setTermDraft((draft) => draft.map((term) => term.id === termId ? { ...term, ...changes } : term));
   }
 
   function saveAssessment(event: FormEvent<HTMLFormElement>) {
@@ -820,8 +855,13 @@ export default function Home() {
                   <input id="term-search" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Search the library…" />
                   {searchQuery && <button type="button" className="clear-search" onClick={() => setSearchQuery("")} aria-label="Clear search"><X size={16} /></button>}
                 </div>
+                <button className="outline-button manage-terms-button" type="button" onClick={() => setShowTermManager((open) => !open)}><ShieldCheck size={15} /> {showTermManager ? "Close editor" : "Admin editor"}</button>
               </div>
             </div>
+
+            {showTermManager && <div className="admin-term-panel">
+              {!adminUnlocked ? <form className="admin-login" onSubmit={unlockAdmin}><div className="admin-panel-heading"><Lock size={18} /><div><strong>Admin access required</strong><span>Only the administrator can change command-term categories or mark schemes.</span></div></div><div className="admin-login-row"><label htmlFor="admin-pin">Admin PIN</label><input id="admin-pin" type="password" value={adminPin} onChange={(event) => setAdminPin(event.target.value)} autoComplete="current-password" required placeholder="Enter your admin PIN" /><button className="primary-button" type="submit"><Unlock size={15} /> Unlock</button></div>{adminError && <div className="admin-error" role="alert">{adminError}</div>}</form> : <div className="admin-editor"><div className="admin-panel-heading"><ShieldCheck size={18} /><div><strong>Admin command-term editor</strong><span>Each command term has one category only, so it cannot be duplicated across levels.</span></div><button type="button" className="text-button admin-lock-button" onClick={() => { setAdminUnlocked(false); setShowTermManager(false); }}>Lock editor <Lock size={14} /></button></div><div className="admin-editor-grid"><div className="admin-term-picker"><label htmlFor="admin-term-select">Command term</label><select id="admin-term-select" value={adminEditTermId} onChange={(event) => setAdminEditTermId(event.target.value)}>{termDraft.map((term) => <option key={term.id} value={term.id}>{term.label}</option>)}</select><p>Move a term by changing its single assigned category.</p></div>{adminEditingTerm && <div className="admin-term-fields"><div className="admin-fields-row"><div className="field-group"><label htmlFor="admin-term-label">Term name</label><input id="admin-term-label" value={adminEditingTerm.label} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { label: event.target.value })} /></div><div className="field-group"><label htmlFor="admin-term-tier">Category</label><select id="admin-term-tier" value={adminEditingTerm.tier} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { tier: event.target.value as TierKey })}>{tierOrder.map((tier) => <option key={tier} value={tier}>{tierMeta[tier].label}</option>)}</select></div></div><div className="field-group"><label htmlFor="admin-term-summary">What it means</label><textarea id="admin-term-summary" rows={2} value={adminEditingTerm.summary} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { summary: event.target.value })} /></div><div className="field-group"><label htmlFor="admin-term-ask">What the command term asks</label><textarea id="admin-term-ask" rows={3} value={adminEditingTerm.ask} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { ask: event.target.value })} /></div><div className="admin-fields-row"><div className="field-group"><label htmlFor="admin-term-examples">Example questions <span className="optional">one per line</span></label><textarea id="admin-term-examples" rows={5} value={adminEditingTerm.examples.join("\n")} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { examples: event.target.value.split("\n").map((line) => line.trim()).filter(Boolean) })} /></div><div className="field-group"><label htmlFor="admin-term-tips">Teacher tips <span className="optional">one per line</span></label><textarea id="admin-term-tips" rows={5} value={adminEditingTerm.tips.join("\n")} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { tips: event.target.value.split("\n").map((line) => line.trim()).filter(Boolean) })} /></div></div><div className="field-group"><label htmlFor="admin-term-rubric">Mark scheme <span className="optional">one band per line: marks | descriptor</span></label><textarea id="admin-term-rubric" rows={6} value={adminEditingTerm.rubric.map((row) => `${row.marks} | ${row.descriptor}`).join("\n")} onChange={(event) => updateDraftTerm(adminEditingTerm.id, { rubric: event.target.value.split("\n").map((line) => { const [marks, ...descriptor] = line.split("|"); return { marks: marks?.trim() ?? "", descriptor: descriptor.join("|").trim() }; }).filter((row) => row.marks || row.descriptor) })} /></div></div>}</div><div className="admin-editor-actions"><button type="button" className="text-button" onClick={resetTermAssignments}>Reset school framework</button><button type="button" className="primary-button" onClick={saveTermAssignments}><Save size={15} /> Save command-term changes</button></div></div>}
+            </div>}
 
             <div className="library-toolbar">
               <div className="tier-tabs" role="tablist" aria-label="Filter command terms by level">
