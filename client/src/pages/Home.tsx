@@ -644,10 +644,16 @@ export default function Home() {
   const [saveMessage, setSaveMessage] = useState("");
   const [assessmentForm, setAssessmentForm] = useState({ name: "", tiers: ["foundation"] as TierKey[], yearGroup: "year7" as YearGroup, questions: [""], answers: "" });
 
+  const isSearching = searchQuery.trim().length > 0;
+
   const filteredTerms = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     return termLibrary.filter((term) => {
-      const matchesTier = term.tier === activeTier;
+      // While searching, match the term against every level, not just the
+      // currently selected pyramid tier, so results surface wherever the
+      // term lives. Matching is always case-insensitive (both sides are
+      // lower-cased), so "define" and "Define" match the same terms.
+      const matchesTier = query ? true : term.tier === activeTier;
       const matchesQuery = !query || [term.label, term.summary, term.ask, ...term.examples].join(" ").toLowerCase().includes(query);
       return matchesTier && matchesQuery;
     });
@@ -875,13 +881,17 @@ export default function Home() {
             </div>
 
             <div className="library-layout">
-              <div className="term-list" aria-label={`${tierMeta[activeTier].label} command terms`}>
+              <div className="term-list" aria-label={isSearching ? "Command terms matching your search, across all levels" : `${tierMeta[activeTier].label} command terms`}>
                 {filteredTerms.length === 0 ? (
                   <div className="empty-state"><CircleHelp size={22} /><strong>No terms found</strong><span>Try a different search or clear the filter.</span></div>
                 ) : filteredTerms.map((term, index) => (
                   <button key={term.id} type="button" className={`term-card ${selectedTerm?.id === term.id ? "is-selected" : ""}`} onClick={() => selectTerm(term)}>
                     <span className="term-index">{String(index + 1).padStart(2, "0")}</span>
-                    <span className="term-card-copy"><strong>{term.label}</strong><small>{term.summary}</small></span>
+                    <span className="term-card-copy">
+                      <strong>{term.label}</strong>
+                      <small>{term.summary}</small>
+                      {isSearching && <small className="term-card-tier"><span className={`mini-dot mini-dot-${term.tier}`} aria-hidden="true" />{tierMeta[term.tier].shortLabel}</small>}
+                    </span>
                     <ChevronRight size={18} className="term-chevron" />
                   </button>
                 ))}
