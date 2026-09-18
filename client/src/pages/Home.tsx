@@ -1,4 +1,5 @@
 import { FormEvent, useMemo, useState } from "react";
+import ycisLogo from "@/assets/ycis-logo.png";
 import {
   ArrowDown,
   ArrowUpRight,
@@ -580,7 +581,7 @@ function getStoredAssessments(): Assessment[] {
 function AppMark() {
   return (
     <div className="app-mark" aria-hidden="true">
-      <img src="/manus-storage/YCYW_05ccf744.png" alt="" />
+      <img src={ycisLogo} alt="" />
     </div>
   );
 }
