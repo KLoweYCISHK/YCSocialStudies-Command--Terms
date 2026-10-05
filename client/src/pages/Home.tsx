@@ -556,7 +556,7 @@ function getStoredTerms(): Term[] {
   if (typeof window === "undefined") return terms;
   try {
     const savedLibrary = window.localStorage.getItem(termLibraryStorageKey);
-    if (savedLibrary) return JSON.parse(savedLibrary) as Term[];
+    if (savedLibrary) return (JSON.parse(savedLibrary) as Term[]).map((term) => ({ ...term, eyebrow: (term.eyebrow ?? "").replace(/^\d+\s*·\s*/, "") }));
     const savedAssignments = JSON.parse(window.localStorage.getItem(termAssignmentsStorageKey) ?? "{}");
     return terms.map((term) => savedAssignments[term.id] ? { ...term, tier: savedAssignments[term.id] as TierKey } : term);
   } catch {
